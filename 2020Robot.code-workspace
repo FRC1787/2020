@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "2020_Robot"
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic"
+	}
+}
