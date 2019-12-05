@@ -17,6 +17,7 @@ import frc.robot.OI;
 import frc.robot.Robot;
 import frc.robot.RobotMap;
 import frc.robot.commands.RobotDrive;
+import frc.robot.commands.PIDDrive;
 
 
 public class DriveTrain extends Subsystem {
@@ -24,20 +25,20 @@ public class DriveTrain extends Subsystem {
   // here. Call these from Commands.
 
   /*Spark Max Motor Controller Objects*/
-  private CANSparkMax left1 = new CANSparkMax(1, MotorType.kBrushless);
-  private CANSparkMax left2 = new CANSparkMax(2, MotorType.kBrushless);
-  private CANSparkMax right1 = new CANSparkMax(3, MotorType.kBrushless);
-  private CANSparkMax right2 = new CANSparkMax(4, MotorType.kBrushless);
+  private static CANSparkMax left1 = new CANSparkMax(1, MotorType.kBrushless);
+  private static CANSparkMax left2 = new CANSparkMax(2, MotorType.kBrushless);
+  private static CANSparkMax right1 = new CANSparkMax(3, MotorType.kBrushless);
+  private static CANSparkMax right2 = new CANSparkMax(4, MotorType.kBrushless);
 
   /*Neo Motor Encoder Objects*/
-  public CANEncoder left1E = new CANEncoder(left1);
-  public CANEncoder left2E = new CANEncoder(left2);
-  public CANEncoder right1E = new CANEncoder(right1);
-  public CANEncoder right2E = new CANEncoder(right2);
+  public static CANEncoder left1E = new CANEncoder(left1);
+  public static CANEncoder left2E = new CANEncoder(left2);
+  public static CANEncoder right1E = new CANEncoder(right1);
+  public static CANEncoder right2E = new CANEncoder(right2);
 
 
+  /* DriveTrain initialization code */
   public DriveTrain(){
-
     left1.setIdleMode(IdleMode.kBrake);
     right1.setIdleMode(IdleMode.kBrake);
     left2.setIdleMode(IdleMode.kBrake);
@@ -55,133 +56,154 @@ public class DriveTrain extends Subsystem {
     right2.set(-speed);
   }
 
-  public double leftEncoder(){
-    return (left1E.getPosition() + left2E.getPosition())/2;
+  //average encoder value on the left side of the robot
+  public static double leftEncoder(){
+    return -(left1E.getPosition() + left2E.getPosition())/2;
   }
   
-  public double rightEncoder(){
+  //average encoder value on the right side of the robot
+  public static double rightEncoder(){
     return (right1E.getPosition() + right2E.getPosition())/2;
   }
 
-  public void tankDrive(double leftSide, double rightSide) {
+  //% output of the right side of the robot
+  public double averageRightsideOutput(){
+    return (right1.get() + right2.get())/2;
+  }
+
+  //% output of the left side of the robot
+  public double averageLeftsideOutput(){
+    return (left1.get() + left2.get())/2;
+  }
+
+  //sets % values for each side of the robot individually
+  public static void tankDrive(double leftSide, double rightSide) {
     left1.set(leftSide);
     right1.set(rightSide);
     left2.set(leftSide);
     right2.set(rightSide);
-}
-
-  public void seekDrive(double destination, String feedBackSensor, String seekType)
-  {
-      if (feedBackSensor == "navX")
-      {
-          tankDrive(pIDDrive(destination, Gyro.navXRotAngle(), feedBackSensor, seekType), pIDDrive(destination, Gyro.navXRotAngle(), feedBackSensor, seekType));
-      }
-      else if (feedBackSensor == "encoder")
-      {
-          tankDrive(-pIDDrive(destination, rightEncoder(), feedBackSensor, seekType), pIDDrive(destination, leftEncoder(), feedBackSensor, seekType));
-      }
-
   }
 
-  public double pIDDrive(double targetDistance, double actualValue, String feedBackSensor, String seekType) // enter target distance in feet
-{ 
 
-      if (feedBackSensor == "navX")
-      {
-       RobotMap.proportionalTweak = 0.0047; //0.0065 0.0047
-       RobotMap.integralTweak = 0.0; //.000007
-       RobotMap.DerivativeTweak = 0.0000;
-       RobotMap.okErrorRange = 0.0;
-      }
-      else if (feedBackSensor == "encoder")
-      {
-       RobotMap.proportionalTweak = 0.0065; //placeholers until ideal values for linear drive are found
-       RobotMap.integralTweak = 0.0;
-       RobotMap.DerivativeTweak = 0.0;
-       RobotMap.okErrorRange = 0.0; 
-      }
-      else
-      {
-       RobotMap.proportionalTweak = 0; //these just stay zero
-       RobotMap.integralTweak = 0;
-       RobotMap.DerivativeTweak = 0;
-       RobotMap.okErrorRange = 0; 
-      }
-      if (seekType == "exact"){
-          RobotMap.error = targetDistance - actualValue;
-      }
-      else if (seekType == "oneWay"){
+
+  //drives both sides of the robot based on values from a feedback sensor and a target position
+  public static void seekDrive(double destination, String feedBackSensor, String seekType)
+  {
+    if (feedBackSensor == "navX")
+    {
+      tankDrive(pIDDrive(destination, Gyro.navXRotAngle(), feedBackSensor, seekType), pIDDrive(destination, Gyro.navXRotAngle(), feedBackSensor, seekType));
+    }
+    
+    else if (feedBackSensor == "encoder")
+    {
+      tankDrive(-pIDDrive(destination, leftEncoder(), feedBackSensor, seekType), pIDDrive(destination, rightEncoder(), feedBackSensor, seekType));
+    }
+  }
+
+  // Outputs a drive value based on sensor inputs and a target value
+  public static double pIDDrive(double targetDistance, double actualValue, String feedBackSensor, String seekType) // enter target distance in feet
+  {
+    if (feedBackSensor == "navX")
+    {
+      RobotMap.proportionalTweak = 0.0052; //0.0065 0.0047
+      RobotMap.integralTweak = 0.000007; //.000007
+      RobotMap.DerivativeTweak = 0.0000;
+      RobotMap.okErrorRange = 0.0;
+    }
+    
+    else if (feedBackSensor == "encoder")
+    {
+      RobotMap.proportionalTweak = 0.0065; //placeholers until ideal values for linear drive are found
+      RobotMap.integralTweak = 0.0;
+      RobotMap.DerivativeTweak = 0.0;
+      RobotMap.okErrorRange = 0.0; 
+    }
+    
+    else
+    {
+      RobotMap.proportionalTweak = 0; //these just stay zero
+      RobotMap.integralTweak = 0;
+      RobotMap.DerivativeTweak = 0;
+      RobotMap.okErrorRange = 0; 
+    }
+    
+    if (seekType == "exact")
+    {
+      RobotMap.error = targetDistance - actualValue;
+    }
+    
+    else if (seekType == "oneWay")
+    {
       RobotMap.error = noNegative(Math.abs(targetDistance - (actualValue)));
-      }
-  RobotMap.proportional = RobotMap.error;
-  RobotMap.derivative = (RobotMap.previousError - RobotMap.error)/ 0.02;
-  RobotMap.integral += RobotMap.previousError;
-  RobotMap.previousError = RobotMap.error;
-     
-
-  if ((RobotMap.error > RobotMap.okErrorRange || RobotMap.error < -RobotMap.okErrorRange)) //&& !(targetDistance < actualValue && seekType == "oneWay")
-  {
-    RobotMap.pIDMotorVoltage = truncateMotorOutput((RobotMap.proportionalTweak * RobotMap.proportional) + (RobotMap.DerivativeTweak * RobotMap.derivative) + (RobotMap.integralTweak * RobotMap.integral), feedBackSensor);
-    return RobotMap.pIDMotorVoltage;
-      }
-      if ( targetDistance - actualValue < 0 )
-      {
-          return 0;
-      }
-  else
-  {
-    RobotMap.proportional = 0;
-    RobotMap.integral = 0;
-    RobotMap.derivative = 0;
-    RobotMap.previousError = 0;
-          return 0;
-  }
+    }
   
+    RobotMap.proportional = RobotMap.error;  //Math for determining motor output based on PID values
+    RobotMap.derivative = (RobotMap.previousError - RobotMap.error)/ 0.02;
+    RobotMap.integral += RobotMap.previousError;
+    RobotMap.previousError = RobotMap.error;
+    
+    if ((RobotMap.error > RobotMap.okErrorRange || RobotMap.error < -RobotMap.okErrorRange)) //&& !(targetDistance < actualValue && seekType == "oneWay")
+    {
+      RobotMap.pIDMotorVoltage = truncateMotorOutput((RobotMap.proportionalTweak * RobotMap.proportional) + (RobotMap.DerivativeTweak * RobotMap.derivative) + (RobotMap.integralTweak * RobotMap.integral), feedBackSensor);
+      return RobotMap.pIDMotorVoltage;
+    }
+      
+    if ((targetDistance - actualValue < 0) && seekType == "oneWay")
+    {
+      return 0;
+    }
+    
+    else
+    {
+      RobotMap.proportional = 0;
+      RobotMap.integral = 0;
+      RobotMap.derivative = 0;
+      RobotMap.previousError = 0;
+      return 0;
+    }
   }
   
   private static double truncateMotorOutput(double motorOutput, String feedBackSensor) //Whatever the heck Jake and Van did
   {
-      if (feedBackSensor == "encoder")
-      {
-        if (motorOutput > 1) 
-          return 0.5; 
-        
-        else if (motorOutput < -1) 
-          return -0.5;
+    if (feedBackSensor == "encoder")//sets max motor % to 50 if using encoders to drive
+    {
+      if (motorOutput > 1) 
+      return 0.5; 
       
+      else if (motorOutput < -1) 
+      return -0.5;
+      
+      else 
+      return motorOutput;
+    }
+      
+    if (feedBackSensor == "navX")//sets max motor % to 40 if using navx to drive
+      {
+        if (motorOutput > .4)
+        return 0.4; 
+          
+        else if (motorOutput < -.4)
+        return -0.4;
+          
         else 
-          return motorOutput;
-        
+        return motorOutput; 
       }
-      
-      if (feedBackSensor == "navX")
-      {
-          if (motorOutput > .4)
-             return 0.4; 
-          
-          else if (motorOutput < -.4)
-             return -0.4;
-          
-          else 
-             return motorOutput;
-          
-        }
-        else
-        return 0;
+        
+      else
+      return 0;
   }
   
+  //returns 0 if input is below zero and returns the input if it is above 0
   public static double noNegative(double input)
     {
-        if (input >= 0)
-        return input;
-        else 
-        return 0;
+      if (input >= 0)
+      return input;
+      else 
+      return 0;
     }
 
   @Override
   public void initDefaultCommand() {
-    // Set the default command for a subsystem here.
-    // setDefaultCommand(new MySpecialCommand());
     setDefaultCommand(new RobotDrive());
   }
 }

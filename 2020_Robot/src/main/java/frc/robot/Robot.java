@@ -11,12 +11,15 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.command.Subsystem;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import frc.robot.OI;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.Gyro;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,43 +29,28 @@ import frc.robot.subsystems.DriveTrain;
  * project.
  */
 public class Robot extends TimedRobot {
-  public static ExampleSubsystem m_subsystem = new ExampleSubsystem();
-  public static OI m_oi;
-
-  Command m_autonomousCommand;
-  SendableChooser<Command> m_chooser = new SendableChooser<>();
-
+  public static OI OI;
   public static DriveTrain driveTrain = new DriveTrain();
+  public static Vision vision = new Vision();
+  public static Gyro gyro = new Gyro();
 
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
+  NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+
+  public static double lX;
+  public static double lY;
+  public static double lArea;
+
   @Override
   public void robotInit() {
-    m_oi = new OI();
-    m_chooser.setDefaultOption("Default Auto", new ExampleCommand());
-    // chooser.addOption("My Auto", new MyAutoCommand());
-    SmartDashboard.putData("Auto mode", m_chooser);
+    OI = new OI();
   }
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use
-   * this for items like diagnostics that you want ran during disabled,
-   * autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before
-   * LiveWindow and SmartDashboard integrated updating.
-   */
   @Override
   public void robotPeriodic() {
+    this.setDashboard();
+    this.readTables();
   }
 
-  /**
-   * This function is called once each time the robot enters Disabled mode.
-   * You can use it to reset any subsystem information you want to clear when
-   * the robot is disabled.
-   */
   @Override
   public void disabledInit() {
   }
@@ -72,37 +60,10 @@ public class Robot extends TimedRobot {
     Scheduler.getInstance().run();
   }
 
-  /**
-   * This autonomous (along with the chooser code above) shows how to select
-   * between different autonomous modes using the dashboard. The sendable
-   * chooser code works with the Java SmartDashboard. If you prefer the
-   * LabVIEW Dashboard, remove all of the chooser code and uncomment the
-   * getString code to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional commands to the
-   * chooser code above (like the commented example) or additional comparisons
-   * to the switch structure below with additional strings & commands.
-   */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_chooser.getSelected();
-
-    /*
-     * String autoSelected = SmartDashboard.getString("Auto Selector",
-     * "Default"); switch(autoSelected) { case "My Auto": autonomousCommand
-     * = new MyAutoCommand(); break; case "Default Auto": default:
-     * autonomousCommand = new ExampleCommand(); break; }
-     */
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.start();
-    }
   }
 
-  /**
-   * This function is called periodically during autonomous.
-   */
   @Override
   public void autonomousPeriodic() {
     Scheduler.getInstance().run();
@@ -110,30 +71,32 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    // This makes sure that the autonomous stops running when
-    // teleop starts running. If you want the autonomous to
-    // continue until interrupted by another command, remove
-    // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
     Scheduler.getInstance().run();
-    
-    
   }
 
-  /**
-   * This function is called periodically during operator control.
-   */
   @Override
   public void teleopPeriodic() {
     Scheduler.getInstance().run();
   }
 
-  /**
-   * This function is called periodically during test mode.
-   */
   @Override
   public void testPeriodic() {
+  }
+
+  public void setDashboard(){ //sends values to SmartDashboard to be read externally
+    SmartDashboard.putNumber("Right Encoder", driveTrain.rightEncoder());
+    SmartDashboard.putNumber("left Encoder", driveTrain.leftEncoder());
+    SmartDashboard.putBoolean("button 1", OI.rightStick.getRawButton(1));
+    SmartDashboard.putNumber("Right Output", driveTrain.averageRightsideOutput());
+    SmartDashboard.putNumber("Left Output", driveTrain.averageLeftsideOutput());
+    SmartDashboard.putNumber("X Offset", this.lX);
+    SmartDashboard.putNumber("Y Offset", this.lY);
+    SmartDashboard.putNumber("Hull Area", this.lArea);
+  }
+
+  public void readTables(){ //Reads values from NetworkTables and sets variables to those values
+    NetworkTableEntry tx = table.getEntry("tx"); this.lX = tx.getDouble(0.0);
+    NetworkTableEntry ty = table.getEntry("ty"); this.lY = ty.getDouble(0.0);
+    NetworkTableEntry ta = table.getEntry("ta"); this.lArea = ta.getDouble(0.0);
   }
 }

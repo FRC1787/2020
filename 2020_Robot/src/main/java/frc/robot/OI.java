@@ -9,7 +9,11 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import frc.robot.commands.*;
-import edu.wpi.first.wpilibj.RobotDrive;
+import frc.robot.commands.RobotDrive;
+import frc.robot.commands.PIDDrive;
+import frc.robot.subsystems.DriveTrain;
+import edu.wpi.first.wpilibj.buttons.Button;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 /**
  * This class is the glue that binds the controls on the physical operator
@@ -44,6 +48,10 @@ public class OI {
   // until it is finished as determined by it's isFinished method.
   // button.whenReleased(new ExampleCommand());
 
+  
+  public Button right1 = new JoystickButton(rightStick, 1);
+  public Button right2 = new JoystickButton(rightStick, 2);
+
   public static Joystick rightStick = new Joystick(0);
   public static Joystick leftStick = new Joystick(1);
 
@@ -56,8 +64,12 @@ public class OI {
   }
 
   public OI(){
-    //new Drive();
+    
+    right1.whenPressed(new turnToTarget());
+    right2.whenPressed(new PIDDrive(50, "encoder", "exact"));
+    
   }
+  
   
 
   

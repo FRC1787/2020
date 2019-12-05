@@ -8,24 +8,21 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
+import frc.robot.Robot;
 import com.kauailabs.navx.frc.AHRS;
 
-/**
- * Add your docs here.
- */
-public class Gyro extends Subsystem {
-  // Put methods for controlling this subsystem
-  // here. Call these from Commands.
 
+public class Gyro extends Subsystem {
+  
+  /* NavX object */
   public static AHRS navX = new AHRS();
 
+  //returns rotational angle of the robot in degrees
   public static double navXRotAngle(){
     return navX.getYaw();
   }
 
   @Override
   public void initDefaultCommand() {
-    // Set the default command for a subsystem here.
-    // setDefaultCommand(new MySpecialCommand());
   }
 }

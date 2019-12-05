@@ -7,45 +7,46 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
 import frc.robot.OI;
-import frc.robot.subsystems.DriveTrain;
-import edu.wpi.first.wpilibj.command.Command;
+import frc.robot.RobotMap;
 
-public class RobotDrive extends Command {
-  public RobotDrive() {
-    // Use requires() here to declare subsystem dependencies
+public class turnToTarget extends Command {
+  public turnToTarget() {
     requires(Robot.driveTrain);
+    requires(Robot.vision);
+
   }
 
   @Override
-  protected void initialize() {
-    Robot.driveTrain.left1E.setPosition(0); //Resets all the neo encoders to 0
-    Robot.driveTrain.left2E.setPosition(0);
-    Robot.driveTrain.right2E.setPosition(0);
-    Robot.driveTrain.right2E.setPosition(0);
+  protected void initialize() { //resets the rotaional angle of the NavX to 0
+    Robot.gyro.navX.reset(); 
   }
 
   @Override
-  protected void execute() {
-    Robot.driveTrain.moveLeftSide(OI.rightStickY() + OI.rightStickX()); // reads Joystick values and converts them to drive values for each half of the robot
-    Robot.driveTrain.moveRightSide(OI.rightStickY() - OI.rightStickX());
+  protected void execute() { //uses PID to turn the robot so a target is in the center of the camera
+    Robot.driveTrain.seekDrive(Robot.lX, "navX", "exact");
   }
 
   @Override
   protected boolean isFinished() {
+    if (OI.rightStick.getRawButton(RobotMap.DRIVETRAIN_OVERRIDE_BUTTON))
+    return true;
+
+    else
     return false;
   }
 
   @Override
   protected void end() {
-    Robot.driveTrain.moveLeftSide(0);
     Robot.driveTrain.moveRightSide(0);
+    Robot.driveTrain.moveLeftSide(0);
   }
 
   @Override
   protected void interrupted() {
-    Robot.driveTrain.moveLeftSide(0);
     Robot.driveTrain.moveRightSide(0);
+    Robot.driveTrain.moveLeftSide(0);
   }
 }
