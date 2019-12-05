@@ -48,12 +48,12 @@ public class OI {
   // until it is finished as determined by it's isFinished method.
   // button.whenReleased(new ExampleCommand());
 
-  
-  public Button right1 = new JoystickButton(rightStick, 1);
-  public Button right2 = new JoystickButton(rightStick, 2);
+  /* Button Objects */
+  public Button right1 = new JoystickButton(rightStick, 1); //Trigger
+  public Button right2 = new JoystickButton(rightStick, 2); //back Top Button
 
-  public static Joystick rightStick = new Joystick(0);
-  public static Joystick leftStick = new Joystick(1);
+  public static Joystick rightStick = new Joystick(0); //Right Joystick
+  public static Joystick leftStick = new Joystick(1); // Left Joystick
 
   public static double rightStickX(){
     return rightStick.getX();

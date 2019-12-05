@@ -29,6 +29,12 @@ import frc.robot.subsystems.Gyro;
  * project.
  */
 public class Robot extends TimedRobot {
+
+  protected int farfar37;
+  protected double internetSpeed = 2.0;
+  transient boolean bruhMoment = true;
+  
+  
   public static OI OI;
   public static DriveTrain driveTrain = new DriveTrain();
   public static Vision vision = new Vision();

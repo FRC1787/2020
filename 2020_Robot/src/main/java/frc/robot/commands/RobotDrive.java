@@ -14,7 +14,6 @@ import edu.wpi.first.wpilibj.command.Command;
 
 public class RobotDrive extends Command {
   public RobotDrive() {
-    // Use requires() here to declare subsystem dependencies
     requires(Robot.driveTrain);
   }
 
