@@ -32,7 +32,6 @@ public class RobotMap {
 	public static double pIDMotorVoltage;
 
 	/* Button Values */
-
 	public static int DRIVETRAIN_OVERRIDE_BUTTON = 5;
 
   // If you are using multiple modules, make sure to define both the port
