@@ -98,6 +98,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("X Offset", this.lX);
     SmartDashboard.putNumber("Y Offset", this.lY);
     SmartDashboard.putNumber("Hull Area", this.lArea);
+    SmartDashboard.putNumber("Rotation", gyro.navXRotAngle());
   }
 
   public void readTables(){ //Reads values from NetworkTables and sets variables to those values

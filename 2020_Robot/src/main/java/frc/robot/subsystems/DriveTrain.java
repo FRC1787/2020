@@ -98,6 +98,16 @@ public class DriveTrain extends Subsystem {
     {
       tankDrive(-pIDDrive(destination, leftEncoder(), feedBackSensor, seekType), pIDDrive(destination, rightEncoder(), feedBackSensor, seekType));
     }
+
+    else if (feedBackSensor == "limeLight")
+    {
+      tankDrive(-pIDDrive(destination, Robot.lArea*5, feedBackSensor, seekType), pIDDrive(destination, Robot.lArea*5, feedBackSensor, seekType));
+    }
+
+    else if (feedBackSensor == "limeLight" && seekType == "chase")
+    {
+      tankDrive(-pIDDrive(destination, Robot.lArea, feedBackSensor, seekType), pIDDrive(destination, Robot.lArea, feedBackSensor, seekType));
+    }
   }
 
   // Outputs a drive value based on sensor inputs and a target value
@@ -105,13 +115,13 @@ public class DriveTrain extends Subsystem {
   {
     if (feedBackSensor == "navX")
     {
-      RobotMap.proportionalTweak = 0.0052; //0.0065 0.0047
-      RobotMap.integralTweak = 0.000007; //.000007
-      RobotMap.DerivativeTweak = 0.0000;
+      RobotMap.proportionalTweak = 0.0066; //0.0065 0.0047
+      RobotMap.integralTweak = 0.00015; //.000007
+      RobotMap.DerivativeTweak = 0.000025;
       RobotMap.okErrorRange = 0.0;
     }
     
-    else if (feedBackSensor == "encoder")
+    else if (feedBackSensor == "encoder" || feedBackSensor == "limeLight")
     {
       RobotMap.proportionalTweak = 0.0065; //placeholers until ideal values for linear drive are found
       RobotMap.integralTweak = 0.0;
@@ -165,7 +175,7 @@ public class DriveTrain extends Subsystem {
   
   private static double truncateMotorOutput(double motorOutput, String feedBackSensor) //Whatever the heck Jake and Van did
   {
-    if (feedBackSensor == "encoder")//sets max motor % to 50 if using encoders to drive
+    if (feedBackSensor == "encoder" || feedBackSensor == "limeLight")//sets max motor % to 50 if using encoders or Limelight feedback to drive
     {
       if (motorOutput > 1) 
       return 0.5; 
@@ -179,11 +189,11 @@ public class DriveTrain extends Subsystem {
       
     if (feedBackSensor == "navX")//sets max motor % to 40 if using navx to drive
       {
-        if (motorOutput > .4)
-        return 0.4; 
+        if (motorOutput > .7)
+        return 0.7; 
           
-        else if (motorOutput < -.4)
-        return -0.4;
+        else if (motorOutput < -.7)
+        return -0.7;
           
         else 
         return motorOutput; 
@@ -196,8 +206,9 @@ public class DriveTrain extends Subsystem {
   //returns 0 if input is below zero and returns the input if it is above 0
   public static double noNegative(double input)
     {
-      if (input >= 0)
+      if (input >= 0) 
       return input;
+      
       else 
       return 0;
     }

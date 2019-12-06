@@ -48,12 +48,15 @@ public class OI {
   // until it is finished as determined by it's isFinished method.
   // button.whenReleased(new ExampleCommand());
 
+
+  /* Joystick Objects */
+  public static Joystick rightStick = new Joystick(0); //Right Joystick
+  public static Joystick leftStick = new Joystick(1); // Left Joystick
+
   /* Button Objects */
   public Button right1 = new JoystickButton(rightStick, 1); //Trigger
   public Button right2 = new JoystickButton(rightStick, 2); //back Top Button
-
-  public static Joystick rightStick = new Joystick(0); //Right Joystick
-  public static Joystick leftStick = new Joystick(1); // Left Joystick
+  public Button right3 = new JoystickButton(rightStick, 3);
 
   public static double rightStickX(){
     return rightStick.getX();
@@ -67,6 +70,7 @@ public class OI {
     
     right1.whenPressed(new turnToTarget());
     right2.whenPressed(new PIDDrive(50, "encoder", "exact"));
+    right3.whenPressed(new Chase());
     
   }
   

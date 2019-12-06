@@ -7,29 +7,36 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.Robot;
+import edu.wpi.first.wpilibj.command.Command;
 import frc.robot.OI;
 import frc.robot.RobotMap;
 
-public class turnToTarget extends Command {
-  public turnToTarget() {
+public class Chase extends Command {
+  public Chase() {
     requires(Robot.driveTrain);
     requires(Robot.vision);
-
   }
 
+  // Called just before this Command runs the first time
   @Override
-  protected void initialize() { //resets the rotaional angle of the NavX to 0
-    Robot.gyro.navX.reset(); 
-  }
-
-  @Override
-  protected void execute() { //uses PID to turn the robot so a target is in the center of the camera
+  protected void initialize() {
     Robot.gyro.navX.reset();
-    Robot.driveTrain.seekDrive(Robot.lX, "navX", "exact");
+    Robot.driveTrain.left1E.setPosition(0); //resets the encoder values to 0
+    Robot.driveTrain.left2E.setPosition(0);
+    Robot.driveTrain.right1E.setPosition(0);
+    Robot.driveTrain.right2E.setPosition(0);
+
   }
 
+  // Called repeatedly when this Command is scheduled to run
+  @Override
+  protected void execute() {
+    Robot.gyro.navX.reset();
+    Robot.driveTrain.seekDrive(Robot.vision.distanceOutput(2), "limeLight", "exact");
+  }
+
+  // Make this return true when this Command no longer needs to run execute()
   @Override
   protected boolean isFinished() {
     if (OI.rightStick.getRawButton(RobotMap.DRIVETRAIN_OVERRIDE_BUTTON))
@@ -39,12 +46,15 @@ public class turnToTarget extends Command {
     return false;
   }
 
+  // Called once after isFinished returns true
   @Override
   protected void end() {
     Robot.driveTrain.moveRightSide(0);
     Robot.driveTrain.moveLeftSide(0);
   }
 
+  // Called when another command which requires one or more of the same
+  // subsystems is scheduled to run
   @Override
   protected void interrupted() {
     Robot.driveTrain.moveRightSide(0);
