@@ -115,9 +115,9 @@ public class DriveTrain extends Subsystem {
   {
     if (feedBackSensor == "navX")
     {
-      RobotMap.proportionalTweak = 0.0066; //0.0065 0.0047
-      RobotMap.integralTweak = 0.00015; //.000007
-      RobotMap.DerivativeTweak = 0.000025;
+      RobotMap.proportionalTweak = 0.0057; //0.0065 0.0047
+      RobotMap.integralTweak = 0.000; //.000007
+      RobotMap.DerivativeTweak = 0.0000;
       RobotMap.okErrorRange = 0.0;
     }
     
